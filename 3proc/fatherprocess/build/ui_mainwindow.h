@@ -15,10 +15,8 @@
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QHeaderView>
 #include <QtWidgets/QLabel>
-#include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
-#include <QtWidgets/QPushButton>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QToolBar>
 #include <QtWidgets/QWidget>
@@ -29,9 +27,7 @@ class Ui_MainWindow
 {
 public:
     QWidget *centralWidget;
-    QPushButton *pushButton_fork;
     QLabel *lable_procInfo;
-    QLineEdit *lineEdit_childProcName;
     QMenuBar *menuBar;
     QToolBar *mainToolBar;
     QStatusBar *statusBar;
@@ -43,15 +39,9 @@ public:
         MainWindow->resize(264, 253);
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
-        pushButton_fork = new QPushButton(centralWidget);
-        pushButton_fork->setObjectName(QStringLiteral("pushButton_fork"));
-        pushButton_fork->setGeometry(QRect(100, 120, 61, 27));
         lable_procInfo = new QLabel(centralWidget);
         lable_procInfo->setObjectName(QStringLiteral("lable_procInfo"));
         lable_procInfo->setGeometry(QRect(40, 0, 181, 71));
-        lineEdit_childProcName = new QLineEdit(centralWidget);
-        lineEdit_childProcName->setObjectName(QStringLiteral("lineEdit_childProcName"));
-        lineEdit_childProcName->setGeometry(QRect(70, 80, 121, 27));
         MainWindow->setCentralWidget(centralWidget);
         menuBar = new QMenuBar(MainWindow);
         menuBar->setObjectName(QStringLiteral("menuBar"));
@@ -72,7 +62,6 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "originalProcess", 0));
-        pushButton_fork->setText(QApplication::translate("MainWindow", "fork", 0));
         lable_procInfo->setText(QString());
     } // retranslateUi
 

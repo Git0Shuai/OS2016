@@ -12,13 +12,9 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
 public:
-  explicit MainWindow(QWidget *parent = 0);
+  explicit MainWindow(QString, QWidget *parent = 0);
   ~MainWindow();
 
-private slots:
-  void on_pushButton_fork_clicked();
-  void on_lineEdit_childProcName_textChanged(const QString &arg1);
-  
 private:
   Ui::MainWindow *ui;
 };
