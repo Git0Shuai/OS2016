@@ -1,0 +1,111 @@
+diff --git a/arch/x86/syscalls/syscall_64.tbl b/arch/x86/syscalls/syscall_64.tbl
+index 281150b..59ca052 100644
+--- a/arch/x86/syscalls/syscall_64.tbl
++++ b/arch/x86/syscalls/syscall_64.tbl
+@@ -328,6 +328,8 @@
+ 319	common	memfd_create		sys_memfd_create
+ 320	common	kexec_file_load		sys_kexec_file_load
+ 321	common	bpf			sys_bpf
++# my syscall num
++322	common  cpfile			sys_cpfile
+ 
+ #
+ # x32-specific system call numbers start at 512 to avoid cache impact
+diff --git a/include/linux/syscalls.h b/include/linux/syscalls.h
+index bda9b81..56ae972 100644
+--- a/include/linux/syscalls.h
++++ b/include/linux/syscalls.h
+@@ -205,6 +205,14 @@ extern struct trace_event_functions exit_syscall_print_funcs;
+ 	}								\
+ 	static inline long SYSC##name(__MAP(x,__SC_DECL,__VA_ARGS__))
+ 
++/*
++ *here i declare my syscall
++ */
++asmlinkage long sys_cpfile(const char *filefrom, const char *fileto);
++/*
++ *add code end
++ */
++
+ asmlinkage long sys32_quotactl(unsigned int cmd, const char __user *special,
+ 			       qid_t id, void __user *addr);
+ asmlinkage long sys_time(time_t __user *tloc);
+diff --git a/include/uapi/asm-generic/unistd.h b/include/uapi/asm-generic/unistd.h
+index 22749c1..d694aff 100644
+--- a/include/uapi/asm-generic/unistd.h
++++ b/include/uapi/asm-generic/unistd.h
+@@ -708,8 +708,19 @@ __SYSCALL(__NR_memfd_create, sys_memfd_create)
+ #define __NR_bpf 280
+ __SYSCALL(__NR_bpf, sys_bpf)
+ 
++/*
++ *here i add a new syscall num
++ */
++#define __NR_mysyscpfile 281
++__SYSCALL(__NR_mysyscpfile, sys_cpfile)
++/*
++ *add end
++ */
++
+ #undef __NR_syscalls
+-#define __NR_syscalls 281
++
++// __NR_syscall += 1
++#define __NR_syscalls 282
+ 
+ /*
+  * All syscalls below here should go away really,
+diff --git a/kernel/sys.c b/kernel/sys.c
+index 1eaa2f0..5f3a547 100644
+--- a/kernel/sys.c
++++ b/kernel/sys.c
+@@ -114,6 +114,49 @@ int fs_overflowgid = DEFAULT_FS_OVERFLOWUID;
+ EXPORT_SYMBOL(fs_overflowuid);
+ EXPORT_SYMBOL(fs_overflowgid);
+ 
++
++/*
++ *here is whern i add mysyscall_cp
++ *include/uapi/asm-generic/unistd.h (where syscall num defined) 
++ *      #define __NR_mysyscpfile 281
++ *      __SYSCALL(__NR_mysyscpfile, sys_cpfile)
++ *arch/x86/kernel/syscall_64.c (this file do not need change)
++ *include/linux/syscalls.h (where syscall declare, and it also include a lot of macros)
++ */
++    
++//myCode
++SYSCALL_DEFINE2(cpfile, const char *, filefrom, const char *, fileto)
++{
++    int p_filefrom = sys_open(filefrom, O_RDONLY, 0);
++    int p_fileto = sys_open(fileto, O_WRONLY|O_CREAT, 0666);
++    char buf[1024];
++    int len;
++    mm_segment_t fs;
++
++    fs = get_fs();  //save original environment
++    set_fs(KERNEL_DS); //set 
++
++    if(p_filefrom > 0 && p_fileto > 0){
++        do{
++            len = sys_read(p_filefrom, buf, 1024);
++            sys_write(p_fileto, buf, len);
++        }while(len);
++    }
++    else
++        printk("open file Error!");
++    sys_close(p_filefrom);
++    sys_close(p_fileto);
++      
++    set_fs(fs);  //recover original environment
++
++    return 0;
++}
++
++/*
++ *add code end
++ */
++
++
+ /*
+  * Returns true if current's euid is same as p's uid or euid,
+  * or has CAP_SYS_NICE to p's user_ns.
